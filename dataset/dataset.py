@@ -25,4 +25,5 @@ def calculate_optimal_trajectory(environment):
     :param environment:
     :return: either a list of the actions or an array with the agent at every optimal position
     """
-    pass  # TODO
+    for pos in range(len(environment)):
+        pass  # TODO
