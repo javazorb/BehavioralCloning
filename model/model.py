@@ -9,7 +9,7 @@ class BehavioralCloning(torch.nn.Module):
         self.activation1 = torch.nn.ReLU()
         self.linear2 = torch.nn.Linear(60, 60)
         self.activation2 = torch.nn.ReLU()
-        self.linear3 = torch.nn.Linear(60, 3)  # out_features: move_right percentage, jump percentage, move_right_jump percentage
+        self.linear3 = torch.nn.Linear(60, 4)  # out_features: move_right percentage, move_left_percentage, jump percentage, move_right_jump percentage
         self.softmax = torch.nn.Softmax()
 
     def forward(self, x):

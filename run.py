@@ -3,8 +3,11 @@ import dataset.dataset as data
 
 
 def run():
-    generate_data.generate_and_save_environments(num_environments=1000)
-    training_data, validation_data, testing_data = data.train_test_val_split(generate_data.load_environments())
+    #generate_data.generate_and_save_environments(num_environments=1000)
+    #training_data, validation_data, testing_data = data.train_test_val_split(generate_data.load_environments())
+    envs = generate_data.load_environments()
+    for env in envs:
+        data.calculate_optimal_trajectory(env)
 
 
 if __name__ == '__main__':
