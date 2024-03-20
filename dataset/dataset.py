@@ -86,6 +86,7 @@ def calculate_optimal_trajectory(environment, env_index):
                         previous_pos = i
                         break
                 for i in range(obst_end_pos + get_obstacle_height(environment, obst_start_pos), len(row)):
+                    agent_positions.append((row_index, i))  # TODO check if array is correct
                     row[i] = constants.AGENT
         if previous_pos != 0 and previous_pos <= obst_start_pos + obst_middle:
             # Move 1 step right and 1 step up until middle of the obstacle
