@@ -63,15 +63,9 @@ def calculate_optimal_trajectory(environment, env_index):
     obst_middle = math.ceil(constants.OBSTACLE_WIDTH / 2)
     floor_height = get_env_floor_height(environment)
     obst_start_pos, obst_end_pos = get_obst_positions(environment, floor_height)
-    current_agent_height = floor_height # important for jumping
-    traverse = 0
     previous_pos = 0
     jump_start = obst_start_pos - get_obstacle_height(environment, obst_start_pos)
-    """for row in environment[floor_height + 1:]:
-        for i in range(row):
-            if i + get_obstacle_height(environment, obst_start_pos) < jump_start:
-                row[i] = constants.AGENT
-                previous_pos = i"""
+
     agent_positions = []  # To store agent positions for visualization or further processing
     reached_floor = False
     # Traverse environment rows
@@ -117,6 +111,9 @@ def calculate_optimal_trajectory(environment, env_index):
     #plt.show()
     plt.savefig(os.path.join('dataset/images/optimal_paths', f'environment{env_index}.png'), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    save_path = os.path.join('dataset/data/optimal_paths', f'environment{env_index}.npy')
+    np.save(save_path, environment)
 
     return environment, agent_positions
 
