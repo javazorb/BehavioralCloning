@@ -56,7 +56,8 @@ def get_obstacle_height(environment, obst_start_pos):
 
 def calculate_optimal_trajectory(environment, env_index):
     """
-    Calculates the optimal trajectory to be used for the given environment
+    Calculates the optimal trajectory to be used for the given environment and its id
+    :param env_index:
     :param environment:
     :return: either a list of the actions or an array with the agent at every optimal position
     """
