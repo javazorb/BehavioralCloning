@@ -2,6 +2,8 @@
 dataset/data/*
 dataset/images/*
 
+dataset/optimal_paths.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
