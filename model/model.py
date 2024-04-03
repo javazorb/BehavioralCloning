@@ -10,7 +10,7 @@ class BehavioralCloning(torch.nn.Module):
         self.linear2 = torch.nn.Linear(60, 60)
         self.activation2 = torch.nn.ReLU()
         self.linear3 = torch.nn.Linear(60, 4)  # out_features: move_right percentage, move_left_percentage, jump percentage, move_right_jump percentage
-        self.softmax = torch.nn.Softmax()
+        self.softmax = torch.nn.Softmax() # TODO investigate: Is softmax necessary in my model?
 
     def forward(self, x):
         x = self.linear1(x)
