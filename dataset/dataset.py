@@ -16,7 +16,7 @@ def train_test_val_split(environments, optimal_paths):
     :return: tuple (train, validation, test)
     """
 
-    envs_actions_list = generate_synth_state_actions(environments, optimal_paths) # TODO needs rework potentially
+    envs_actions_list = generate_synth_state_actions(environments, optimal_paths)
     X, y = map(list, zip(*envs_actions_list))
     X_train_temp, X_test, y_train_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=config.RANDOM_SEED)
     X_train, X_val, y_train, y_val = train_test_split(X_train_temp, y_train_temp, test_size=0.25, random_state=config.RANDOM_SEED)
@@ -98,7 +98,7 @@ def calculate_optimal_trajectory(environment, env_index):
                         previous_pos = i
                         break
                 for i in range(obst_end_pos + get_obstacle_height(environment, obst_start_pos), len(row)):
-                    agent_positions.append((row_index, i))  # TODO check if array is correct
+                    agent_positions.append((row_index, i))
                     row[i] = config.AGENT
         if previous_pos != 0 and previous_pos <= obst_start_pos + obst_middle:
             # Move 1 step right and 1 step up until middle of the obstacle

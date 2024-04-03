@@ -11,7 +11,7 @@ def run():
     envs = generate_data.load_environments()
     # save_optimal_paths(envs)
     optimal_paths = load_optimal_paths()
-    train_data, test_data, val_data = data.train_test_val_split(envs, optimal_paths)
+    train_data, test_data, val_data = data.train_test_val_split(envs, optimal_paths) # TODO save train, test and validation data
 
 
 def save_optimal_paths(envs):
