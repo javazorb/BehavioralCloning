@@ -2,17 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
-import constants
+import config
 
 
-def generate_environment(size=(constants.ENV_SIZE, constants.ENV_SIZE),
-                         obstacle_range=(constants.OBSTACLE_RANGE_START, constants.OBSTACLE_RANGE_END),
-                         floor_height_range=(constants.FLOOR_HEIGHT_RANGE_START, constants.FLOOR_HEIGHT_RANGE_END),
-                         obstacle_width=constants.OBSTACLE_WIDTH,
-                         obstacle_height_range=(constants.OBSTACLE_RANGE_HEIGHT_START, constants.OBSTACLE_RANGE_HEIGHT_END)):
+def generate_environment(size=(config.ENV_SIZE, config.ENV_SIZE),
+                         obstacle_range=(config.OBSTACLE_RANGE_START, config.OBSTACLE_RANGE_END),
+                         floor_height_range=(config.FLOOR_HEIGHT_RANGE_START, config.FLOOR_HEIGHT_RANGE_END),
+                         obstacle_width=config.OBSTACLE_WIDTH,
+                         obstacle_height_range=(config.OBSTACLE_RANGE_HEIGHT_START, config.OBSTACLE_RANGE_HEIGHT_END)):
     environment = np.zeros(size, dtype=np.uint8)
     floor_height = np.random.randint(*floor_height_range + (1,))
-    environment[floor_height, :] = constants.WHITE
+    environment[floor_height, :] = config.WHITE
 
     obstacle_top = floor_height + 1  # Assuming obstacle is one unit higher than the floor
     obstacle_bottom = obstacle_top + np.random.randint(*obstacle_height_range + (1,))
@@ -20,7 +20,7 @@ def generate_environment(size=(constants.ENV_SIZE, constants.ENV_SIZE),
     obstacle_right = obstacle_left + obstacle_width
 
     i_top, i_bottom, i_left, i_right = map(int, [obstacle_top, obstacle_bottom, obstacle_left, obstacle_right])
-    environment[i_top:i_bottom, i_left:i_right] = constants.WHITE  # Use 255 for white
+    environment[i_top:i_bottom, i_left:i_right] = config.WHITE  # Use 255 for white
 
     return environment
 

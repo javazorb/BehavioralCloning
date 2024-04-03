@@ -1,27 +1,32 @@
 import numpy as np
-import constants
+import config
 import math
 import matplotlib.pyplot as plt
 import os
+from sklearn.model_selection import train_test_split
 
 
-def train_test_val_split(environments):
+def train_test_val_split(environments, optimal_paths):
     """ Splits the environments into i.i.d training, validation and test sets.
     Utilizes the generate_synth_state_actions before splitting
 
     :param environments:
+    :param optimal_paths:
     :return: tuple (train, validation, test)
     """
+
+
     pass  # TODO
 
 
-def generate_synth_state_actions(environments):
+def generate_synth_state_actions(environments, optimal_paths):
     """Generates synthetic state actions pairs for each environment based on a optimal calculated path,
     for each indivual environment
 
     :param environments: array of np.uint8 arrays
+    :param optimal paths of the environment
     :rtype: list of state action pairs
-    :returns: a list of list with state action pairs e.g. environment with agent on pos 5 as state and move-right as action
+    :returns: a list of list containing the environments and the action corresponding to the optimal path
     """
     envs_state_action = []
     for env in environments:
@@ -36,20 +41,20 @@ def generate_synth_state_actions(environments):
 
 def get_env_floor_height(environment):
     for index, row in enumerate(environment):
-        if constants.WHITE in row:
+        if config.WHITE in row:
             if len(set(row)) == 1:
                 return index
 
 
 def get_obst_positions(environment, floor_height):
-    obst_positions = np.ravel(np.where(environment[floor_height + 1] == constants.WHITE)) # ravel converts the 1,d arr to 1d
+    obst_positions = np.ravel(np.where(environment[floor_height + 1] == config.WHITE)) # ravel converts the 1,d arr to 1d
     return obst_positions[0], obst_positions[-1]
 
 
 def get_obstacle_height(environment, obst_start_pos):
     height = 0
     for index, row in enumerate(environment):
-        if constants.WHITE == row[obst_start_pos]:
+        if config.WHITE == row[obst_start_pos]:
             height += 1
     return height
 
@@ -61,7 +66,7 @@ def calculate_optimal_trajectory(environment, env_index):
     :param environment:
     :return: either a list of the actions or an array with the agent at every optimal position
     """
-    obst_middle = math.ceil(constants.OBSTACLE_WIDTH / 2)
+    obst_middle = math.ceil(config.OBSTACLE_WIDTH / 2)
     floor_height = get_env_floor_height(environment)
     obst_start_pos, obst_end_pos = get_obst_positions(environment, floor_height)
     previous_pos = 0
@@ -76,13 +81,13 @@ def calculate_optimal_trajectory(environment, env_index):
                 for i in range(len(row)):
                     if i < jump_start:
                         agent_positions.append((row_index, i))
-                        row[i] = constants.AGENT
+                        row[i] = config.AGENT
                     else:
                         previous_pos = i
                         break
                 for i in range(obst_end_pos + get_obstacle_height(environment, obst_start_pos), len(row)):
                     agent_positions.append((row_index, i))  # TODO check if array is correct
-                    row[i] = constants.AGENT
+                    row[i] = config.AGENT
         if previous_pos != 0 and previous_pos <= obst_start_pos + obst_middle:
             # Move 1 step right and 1 step up until middle of the obstacle
             start_pos = previous_pos
@@ -90,7 +95,7 @@ def calculate_optimal_trajectory(environment, env_index):
             for col_index in range(start_pos, len(row)):
                 if col_index < obst_start_pos + obst_middle - 1:
                     agent_positions.append((inital_height, col_index))
-                    environment[inital_height, col_index] = constants.AGENT
+                    environment[inital_height, col_index] = config.AGENT
                     previous_pos += 1
                     inital_height += 1
                 else:
@@ -101,7 +106,7 @@ def calculate_optimal_trajectory(environment, env_index):
             for col_index in range(start_pos, len(row)):
                 if current_agent_height > floor_height and not reached_floor:
                     agent_positions.append((current_agent_height, col_index))
-                    environment[current_agent_height, col_index] = constants.AGENT
+                    environment[current_agent_height, col_index] = config.AGENT
                     current_agent_height -= 1
                 else:
                     reached_floor = True

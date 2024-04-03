@@ -1,3 +1,5 @@
+from enum import Enum
+
 RANDOM_SEED = 42
 ENV_SIZE = 60
 OBSTACLE_WIDTH = 5
@@ -12,7 +14,16 @@ AGENT_START_POS = 0
 AGENT_END_POS = 59
 AGENT = 130
 MAX_JUMP_HEIGHT = 20
-RUN_RIGHT = 1
-RUN_LEFT = 2
-JUMP = 3
-JUMP_RIGHT = 4
+
+
+# RUN_RIGHT = 1
+# RUN_LEFT = 2
+# JUMP = 3
+# JUMP_RIGHT = 4
+
+
+class Actions(Enum):
+    RUN_RIGHT = 1
+    RUN_LEFT = 2
+    JUMP = 3
+    JUMP_RIGHT = 4
