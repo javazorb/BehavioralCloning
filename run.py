@@ -10,7 +10,8 @@ def run():
     # training_data, validation_data, testing_data = data.train_test_val_split(generate_data.load_environments())
     envs = generate_data.load_environments()
     # save_optimal_paths(envs)
-    train_data, test_data, val_data = data.train_test_val_split()
+    optimal_paths = load_optimal_paths()
+    train_data, test_data, val_data = data.train_test_val_split(envs, optimal_paths)
 
 
 def save_optimal_paths(envs):
@@ -20,6 +21,13 @@ def save_optimal_paths(envs):
         agent_positions_all_envs.append((index, sorted(list(set(agent_positions)), key=lambda x: x[1])))
     with open('dataset' + os.sep + 'optimal_paths.json', 'w') as file:
         json.dump(agent_positions_all_envs, file, indent=2)
+
+
+def load_optimal_paths():
+    with open('dataset' + os.sep + 'optimal_paths.json', 'r') as file:
+        data = json.load(file)
+    _, paths = map(list, zip(*data))
+    return paths
 
 
 if __name__ == '__main__':

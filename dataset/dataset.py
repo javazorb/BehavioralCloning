@@ -27,7 +27,7 @@ def train_test_val_split(environments, optimal_paths):
 def convert_path_to_actions(env, path):
     actions = []
     for index, coord in enumerate(path):
-        if path[index + 1][0] > coord[0]:
+        if index + 1 < len(path) and path[index + 1][0] > coord[0]:
             actions.append(Actions.JUMP_RIGHT)
         else:
             actions.append(Actions.RUN_RIGHT)
