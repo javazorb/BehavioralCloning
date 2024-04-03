@@ -4,6 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import os
 from sklearn.model_selection import train_test_split
+from config import Actions
 
 
 def train_test_val_split(environments, optimal_paths):
@@ -15,8 +16,22 @@ def train_test_val_split(environments, optimal_paths):
     :return: tuple (train, validation, test)
     """
 
+    envs_actions_list = generate_synth_state_actions(environments, optimal_paths) # TODO needs rework potentially
+    X, y = map(list, zip(*envs_actions_list))
+    X_train_temp, X_test, y_train_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=config.RANDOM_SEED)
+    X_train, X_val, y_train, y_val = train_test_split(X_train_temp, y_train_temp, test_size=0.25, random_state=config.RANDOM_SEED)
 
-    pass  # TODO
+    return (X_train, y_train), (X_val, y_val), (X_test, y_test)
+
+
+def convert_path_to_actions(env, path):
+    actions = []
+    for index, coord in enumerate(path):
+        if path[index + 1][0] > coord[0]:
+            actions.append(Actions.JUMP_RIGHT)
+        else:
+            actions.append(Actions.RUN_RIGHT)
+    return actions
 
 
 def generate_synth_state_actions(environments, optimal_paths):
@@ -24,19 +39,16 @@ def generate_synth_state_actions(environments, optimal_paths):
     for each indivual environment
 
     :param environments: array of np.uint8 arrays
-    :param optimal paths of the environment
+    :param optimal_paths of the environment
     :rtype: list of state action pairs
     :returns: a list of list containing the environments and the action corresponding to the optimal path
     """
     envs_state_action = []
-    for env in environments:
-        env_pairs = []
-        for pos in range(len(env)):
-            state_action_pair = (env[pos], "ACTION")
-            env_pairs.append(state_action_pair)
-        envs_state_action.append(env_pairs)
+    for index, env in enumerate(environments):
+        env_actions = convert_path_to_actions(env, optimal_paths[index])
+        envs_state_action.append((env, env_actions))
 
-    pass  # TODO
+    return envs_state_action
 
 
 def get_env_floor_height(environment):
