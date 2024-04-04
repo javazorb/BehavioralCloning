@@ -20,3 +20,6 @@ class BehavioralCloning(torch.nn.Module):
         x = self.linear3(x)
         x = self.softmax(x)
         return x
+
+
+# TODO create Q-Learning model
