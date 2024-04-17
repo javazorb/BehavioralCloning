@@ -23,3 +23,9 @@ class BehavioralCloning(torch.nn.Module):
 
 
 # TODO create Q-Learning model
+class QLearningModel(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        pass
