@@ -5,6 +5,17 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.model_selection import train_test_split
 from config import Actions
+import pickle
+
+
+def save_dataset(dataset, name):
+    with open('dataset' + os.sep + name + '.pkl', 'wb') as file:
+        pickle.dump(dataset, file)
+
+
+def load_dataset(name, folder):
+    with open(folder + os.sep + name + '.pkl', 'rb') as file:
+        return pickle.load(file)
 
 
 def train_test_val_split(environments, optimal_paths):
