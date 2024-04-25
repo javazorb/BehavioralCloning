@@ -50,17 +50,19 @@ def train_model(model, train_set, val_set, criterion, optimizer):
     for epoch in range(config.MAX_EPOCHS):
         model.train()
         train_loss = 0
-        for environment, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
-            environment = environment.to(device)
+        for environments, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
+            env = environments[0] # TODO add another loop for batch and for environment to traverse each env in batch
+            path = actions[0]
+            environments = environments.to(device)
             actions = actions.to(device)
 
             optimizer.zero_grad()
-            outputs = model(environment)
+            outputs = model(environments)
             loss = criterion(outputs, actions)
             loss.backward()
             optimizer.step()
 
-            train_loss += loss.item() * environment.size(0)
+            train_loss += loss.item() * environments.size(0)
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_set, device, criterion)
         print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")

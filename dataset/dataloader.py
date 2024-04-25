@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
+import numpy as np
 
 
 class EnvironmentDataset(Dataset):
@@ -7,7 +8,9 @@ class EnvironmentDataset(Dataset):
         self.transform = transform
 
     def __len__(self):
-        return len(self.data[0][0])
+        return len(self.data[0])
 
     def __getitem__(self, idx):
-        return self.data[0][idx], self.data[1][idx]
+        env = self.data[0][idx]
+        path = np.array(self.data[1][idx])
+        return (env, path)

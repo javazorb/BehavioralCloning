@@ -25,7 +25,7 @@ def run():
     val_data = data.load_dataset('val_data', 'dataset')
     train_set = EnvironmentDataset(train_data)
     val_set = EnvironmentDataset(val_data)
-    test_set = EnvironmentDataset(test_data) # TODO for train TypeError: default_collate: batch must contain tensors, numpy arrays, numbers, dicts or lists; found <enum 'Actions'>
+    test_set = EnvironmentDataset(test_data)
 
     model = BehavioralCloning()
     train.train_model(model,  train_set, val_set, nn.CrossEntropyLoss(), optim.Adam(model.parameters(), lr=0.001))
