@@ -39,9 +39,9 @@ def convert_path_to_actions(env, path):
     actions = []
     for index, coord in enumerate(path):
         if index + 1 < len(path) and path[index + 1][0] > coord[0]:
-            actions.append(Actions.JUMP_RIGHT)
+            actions.append(Actions.JUMP_RIGHT.value)
         else:
-            actions.append(Actions.RUN_RIGHT)
+            actions.append(Actions.RUN_RIGHT.value)
     return actions
 
 
