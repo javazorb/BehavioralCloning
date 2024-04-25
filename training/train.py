@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import config
 from torch.utils.data import DataLoader
@@ -51,18 +52,33 @@ def train_model(model, train_set, val_set, criterion, optimizer):
         model.train()
         train_loss = 0
         for environments, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
-            env = environments[0] # TODO add another loop for batch and for environment to traverse each env in batch
+            env = environments[0]
             path = actions[0]
-            environments = environments.to(device)
-            actions = actions.to(device)
+            env_loss = 0
+            for environment, path in zip(environments, actions):
+                #path = path.to(device)
+                for i, env_slice in enumerate(environment.T): # get one column of env with pos of floor and additionally with obstacle if in slice
+                    env_slice = env_slice.type(torch.FloatTensor)
+                    env_slice = env_slice.to(device)
+                    optimizer.zero_grad()
+                    outputs = model(env_slice)
+                    temp = path[i] # TODO loss = index 1 is out of bonds
+                    loss = criterion(outputs, path[i]) # TODO is it really right to that for each slice or other solution for train?
+                    loss.backward()
+                    optimizer.step()
+                    env_loss += loss.item()
+                env_loss *= len(path)
+            train_loss += env_loss
+            #environments = environments.to(device)
+            #actions = actions.to(device)
 
-            optimizer.zero_grad()
-            outputs = model(environments)
-            loss = criterion(outputs, actions)
-            loss.backward()
-            optimizer.step()
+            #optimizer.zero_grad()
+            #outputs = model(environments)
+            #loss = criterion(outputs, actions)
+            #loss.backward()
+            #optimizer.step()
 
-            train_loss += loss.item() * environments.size(0)
+            #train_loss += loss.item() * environments.size(0)
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_set, device, criterion)
         print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")

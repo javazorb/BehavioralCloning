@@ -15,7 +15,7 @@ AGENT_END_POS = 59
 AGENT = 130
 MAX_JUMP_HEIGHT = 20
 
-PARAMS = {'batch_size': 64, 'shuffle': True, 'num_workers': 6}
+PARAMS = {'batch_size': 16, 'shuffle': True, 'num_workers': 6}
 MAX_EPOCHS = 100
 # RUN_RIGHT = 1
 # RUN_LEFT = 2

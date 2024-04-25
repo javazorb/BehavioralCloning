@@ -8,8 +8,8 @@ class BehavioralCloning(torch.nn.Module):
         self.linear1 = torch.nn.Linear(60, 60)
         self.activation1 = torch.nn.ReLU()
         self.linear2 = torch.nn.Linear(60, 60)
-        self.activation2 = torch.nn.ReLU()
-        self.linear3 = torch.nn.Linear(60, 4)  # out_features: move_right percentage, move_left_percentage, jump percentage, move_right_jump percentage
+        self.activation2 = torch.nn.ReLU() # TODO out feature 1 is it good or should i get percentage of which of all action most plausible
+        self.linear3 = torch.nn.Linear(60, 1)  # out_features: move_right percentage, move_left_percentage, jump percentage, move_right_jump percentage
         self.softmax = torch.nn.Softmax() # TODO investigate: Is softmax necessary in my model?
 
     def forward(self, x):
