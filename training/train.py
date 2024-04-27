@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 
+# TODO add training method for CNN
 # TODO 1: add train, test loss functions for behavioral cloning + behavioral cloning with rewards + Q-Learning
 # TODO 2: add function where validation set is used for hyperparameter tuning
 # TODO 3: add a reward system for policy tuning in the loss and training function for positive emphasis on correct
@@ -16,8 +17,8 @@ def loss(model, val_loader, device, criterion):  # loss for normal NN Model use 
     val_loss = 0.0
     with torch.no_grad():
         for environment, actions in val_loader:
-            environment = environment.to(device)
-            actions = actions.to(device)
+            environment = environment.to(device, dtype=torch.float32)
+            actions = actions.to(device, dtype=torch.float32)
 
             outputs = model(environment)
             loss = criterion(outputs, actions)
@@ -52,11 +53,25 @@ def train_model(model, train_set, val_set, criterion, optimizer):
         model.train()
         train_loss = 0
         for environments, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
-            env = environments[0]
-            path = actions[0]
+            environments = environments.to(device, dtype=torch.float32)
+            #actions = actions.view(-1).long().to(device, dtype=torch.float32)
+            actions = actions.to(device, dtype=torch.float32)
+            optimizer.zero_grad()
+            outputs = model(environments)
+            loss = 0
+            for i in range(config.BATCH_SIZE):
+                loss += criterion(outputs[i], actions[i])
+            loss /= config.BATCH_SIZE
+            #loss = criterion(outputs, actions)
+            loss.backward()
+            optimizer.step()
+            # env = environments[0]
+            # path = actions[0]
             env_loss = 0
+            """
             for environment, path in zip(environments, actions):
-                #path = path.to(device)
+            
+                path = path.to(device)
                 for i, env_slice in enumerate(environment.T): # get one column of env with pos of floor and additionally with obstacle if in slice
                     env_slice = env_slice.type(torch.FloatTensor)
                     env_slice = env_slice.to(device)
@@ -68,17 +83,9 @@ def train_model(model, train_set, val_set, criterion, optimizer):
                     optimizer.step()
                     env_loss += loss.item()
                 env_loss *= len(path)
-            train_loss += env_loss
-            #environments = environments.to(device)
-            #actions = actions.to(device)
+            train_loss += env_loss"""
 
-            #optimizer.zero_grad()
-            #outputs = model(environments)
-            #loss = criterion(outputs, actions)
-            #loss.backward()
-            #optimizer.step()
-
-            #train_loss += loss.item() * environments.size(0)
+            train_loss += loss.item() * environments.size(0)
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_set, device, criterion)
         print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
