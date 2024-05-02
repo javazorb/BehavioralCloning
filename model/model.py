@@ -22,7 +22,7 @@ class BehavioralModelCNN(nn.Module):
         x = x.view(-1, 60, 4)
         return x
 
-class BehavioralCloning(torch.nn.Module): # TODO going on with CNN
+class BehavioralCloning(torch.nn.Module):
 
     def __init__(self):
         super().__init__()

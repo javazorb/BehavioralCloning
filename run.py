@@ -4,7 +4,7 @@ from tqdm import tqdm
 import os
 import json
 import training.train as train
-from model.model import BehavioralCloning
+from model.model import BehavioralModelCNN
 from dataset.dataloader import EnvironmentDataset
 import torch.nn as nn
 import torch.optim as optim
@@ -27,7 +27,7 @@ def run():
     val_set = EnvironmentDataset(val_data)
     test_set = EnvironmentDataset(test_data)
 
-    model = BehavioralCloning()
+    model = BehavioralModelCNN()
     train.train_model(model,  train_set, val_set, nn.CrossEntropyLoss(), optim.Adam(model.parameters(), lr=0.001))
 
 

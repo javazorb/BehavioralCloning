@@ -51,6 +51,38 @@ def train_model(model, train_set, val_set, criterion, optimizer):
 
     for epoch in range(config.MAX_EPOCHS):
         model.train()
+        train_loss = 0.0
+
+        for environment, actions in  tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
+            environments = environments.to(device, dtype=torch.float32)
+            actions = actions.to(device, dtype=torch.long)  # actions are indices
+
+            optimizer.zero_grad()
+            outputs = model(environments)
+            # Reshape actions to match the output shape of the model
+            actions = actions.unsqueeze(1).repeat(1, environments.size(2))  # Assuming actions are indices
+
+            loss = criterion(outputs, actions)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item() * environments.size(0)
+        train_loss /= len(train_loader.dataset)
+        val_loss = loss(model, val_loader, device, criterion)
+        print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+
+
+def train_model_linear(model, train_set, val_set, criterion, optimizer):
+    use_cuda = torch.cuda.is_available()
+    print(f'Using cuda: {use_cuda}')
+    device = torch.device("cuda:0" if use_cuda else "cpu")
+    model.to(device)
+
+    train_loader = DataLoader(train_set, **config.PARAMS)
+    val_loader = DataLoader(val_set, **config.PARAMS)
+
+    for epoch in range(config.MAX_EPOCHS):
+        model.train()
         train_loss = 0
         for environments, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environments = environments.to(device, dtype=torch.float32)
