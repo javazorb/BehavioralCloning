@@ -53,7 +53,7 @@ def train_model(model, train_set, val_set, criterion, optimizer):
         model.train()
         train_loss = 0.0
 
-        for environment, actions in  tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
+        for environments, actions in  tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environments = environments.to(device, dtype=torch.float32)
             actions = actions.to(device, dtype=torch.long)  # actions are indices
 
