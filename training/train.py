@@ -82,6 +82,7 @@ def train_model(model, train_set, val_set, criterion, optimizer):
         if epoch % 10 == 0 and epoch != 0:
             save_model(model, f"CNN_simple_CE_{epoch}")
         print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+    save_model(model, f"CNN_simple_CE")
 
 
 def train_model_linear(model, train_set, val_set, criterion, optimizer):
