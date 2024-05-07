@@ -3,6 +3,7 @@ import torch
 import config
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import os
 
 
 # TODO add training method for CNN
@@ -12,17 +13,26 @@ from tqdm import tqdm
 #   behaviour
 
 
+def save_model(model, name, path=os.getcwd() + os.sep + 'model' + os.sep):
+    path_model = os.path.join(path, f'{name}_model.pt')
+    path_state_dict = os.path.join(path, f'{name}_state_dict.pt')
+    torch.save(model.state_dict(), path_state_dict)
+    torch.save(model, path_model)
+
+
 def loss(model, val_loader, device, criterion):  # loss for normal NN Model use Cross Entropy loss if I remember correct
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
-        for environment, actions in val_loader:
-            environment = environment.to(device, dtype=torch.float32)
-            actions = actions.to(device, dtype=torch.float32)
+        for environments, actions in val_loader:
+            environments = environments.to(device, dtype=torch.float32)
+            actions = actions.to(device, dtype=torch.long)
 
-            outputs = model(environment)
-            loss = criterion(outputs, actions)
-            val_loss += loss.item() * environment.size(0)
+            outputs = model(environments)
+            outputs = outputs.view(-1, 4)
+            actions = actions.view(-1)
+            curr_loss = criterion(outputs, actions)
+            val_loss += curr_loss.item() * environments.size(0)
 
     val_loss /= len(val_loader.dataset)
     return val_loss
@@ -44,6 +54,8 @@ def train_model(model, train_set, val_set, criterion, optimizer):
     use_cuda = torch.cuda.is_available()
     print(f'Using cuda: {use_cuda}')
     device = torch.device("cuda:0" if use_cuda else "cpu")
+    #print(torch.cuda.memory_allocated(device=device))
+    #device = torch.device("cpu")
     model.to(device)
 
     train_loader = DataLoader(train_set, **config.PARAMS)
@@ -53,23 +65,25 @@ def train_model(model, train_set, val_set, criterion, optimizer):
         model.train()
         train_loss = 0.0
 
-        for environments, actions in  tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
+        for environments, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environments = environments.to(device, dtype=torch.float32)
             actions = actions.to(device, dtype=torch.long)  # actions are indices
 
             optimizer.zero_grad()
             outputs = model(environments)
-            # Reshape actions to match the output shape of the model
-            actions = actions.unsqueeze(1).repeat(1, environments.size(2))  # Assuming actions are indices
-
-            loss = criterion(outputs, actions)
-            loss.backward()
+            #print(f"Current cuda memory allocated: {torch.cuda.memory_allocated(device=device)}")
+            outputs = outputs.view(-1, 4)
+            actions = actions.view(-1)
+            curr_loss = criterion(outputs, actions)
+            curr_loss.backward()
             optimizer.step()
-
-            train_loss += loss.item() * environments.size(0)
+            train_loss += curr_loss.item() * environments.size(0)
+            #print(f"Current cuda memory cached: {torch.cuda.memory_allocated(device=device)}")
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_loader, device, criterion)
-        print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        if epoch % 10 == 0 and epoch != 0:
+            save_model(model, f"CNN_simple_CE_{epoch}")
+        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
 
 
 def train_model_linear(model, train_set, val_set, criterion, optimizer):

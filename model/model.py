@@ -7,11 +7,11 @@ import config
 class BehavioralModelCNN(nn.Module):
     def __init__(self):
         super(BehavioralModelCNN, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=config.BATCH_SIZE, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=config.BATCH_SIZE, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(in_features=config.BATCH_SIZE*config.ENV_SIZE*config.ENV_SIZE, out_features=128)
-        self.fc2 = nn.Linear(in_features=128, out_features=240) # 60*4 = 240, 4 action probs per position
+        self.fc2 = nn.Linear(in_features=128, out_features=240 * config.BATCH_SIZE) # 60*4 = 240, 4 action probs per position
 
     def forward(self, x):
         x = self.relu(self.conv1(x))

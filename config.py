@@ -15,7 +15,7 @@ AGENT_END_POS = 59
 AGENT = 130
 MAX_JUMP_HEIGHT = 20
 
-BATCH_SIZE = 16
+BATCH_SIZE = 10
 PARAMS = {'batch_size': BATCH_SIZE, 'shuffle': True, 'num_workers': 6}
 MAX_EPOCHS = 100
 # RUN_RIGHT = 1
@@ -25,7 +25,7 @@ MAX_EPOCHS = 100
 
 
 class Actions(Enum):
-    RUN_RIGHT = 1
-    RUN_LEFT = 2
-    JUMP = 3
-    JUMP_RIGHT = 4
+    RUN_RIGHT = 0
+    RUN_LEFT = 1
+    JUMP = 2
+    JUMP_RIGHT = 3
