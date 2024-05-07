@@ -6,7 +6,6 @@ from tqdm import tqdm
 import os
 
 
-# TODO add training method for CNN
 # TODO 1: add train, test loss functions for behavioral cloning + behavioral cloning with rewards + Q-Learning
 # TODO 2: add function where validation set is used for hyperparameter tuning
 # TODO 3: add a reward system for policy tuning in the loss and training function for positive emphasis on correct
@@ -54,7 +53,6 @@ def train_model(model, train_set, val_set, criterion, optimizer):
     use_cuda = torch.cuda.is_available()
     print(f'Using cuda: {use_cuda}')
     device = torch.device("cuda:0" if use_cuda else "cpu")
-    #print(torch.cuda.memory_allocated(device=device))
     #device = torch.device("cpu")
     model.to(device)
 
