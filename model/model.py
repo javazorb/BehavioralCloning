@@ -54,6 +54,5 @@ class QLearningModel(torch.nn.Module):
     def forward(self, x):
         pass
 
-
     def policy(self):
         pass
