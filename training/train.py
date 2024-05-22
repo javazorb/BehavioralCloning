@@ -50,9 +50,7 @@ def loss_q():  # loss for Q-Learning model
 
 
 def train_model(model, train_set, val_set, criterion, optimizer):
-    use_cuda = torch.cuda.is_available()
-    print(f'Using cuda: {use_cuda}')
-    device = torch.device("cuda:0" if use_cuda else "cpu")
+    device = get_device()
     #device = torch.device("cpu")
     model.to(device)
 
@@ -85,10 +83,15 @@ def train_model(model, train_set, val_set, criterion, optimizer):
     save_model(model, f"CNN_simple_CE")
 
 
-def train_model_linear(model, train_set, val_set, criterion, optimizer):
+def get_device():
     use_cuda = torch.cuda.is_available()
     print(f'Using cuda: {use_cuda}')
     device = torch.device("cuda:0" if use_cuda else "cpu")
+    return device
+
+
+def train_model_linear(model, train_set, val_set, criterion, optimizer):
+    device = get_device()
     model.to(device)
 
     train_loader = DataLoader(train_set, **config.PARAMS)
