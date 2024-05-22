@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+import random
 import config
 
 
@@ -46,13 +46,34 @@ class BehavioralCloning(torch.nn.Module):
 
 
 # TODO create Q-Learning model
+def epsilon_greedy_action(model, state, epsilon=0.1):
+    if random.random() < epsilon:
+        # Explore: choose a random action
+        return torch.randint(0, len(config.Actions), (1,), dtype=torch.long)
+    else:
+        # Exploit: choose action with highest Q-value
+        with torch.no_grad():
+            Q_values = model(state)
+            action = torch.argmax(Q_values, dim=1)
+            return action
+
+
 class QLearningModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.fc1 = nn.Linear(in_features=32 * config.ENV_SIZE * config.ENV_SIZE, out_features=128)
+        self.fc2 = nn.Linear(in_features=128, out_features=len(config.Actions))  # Output Q-values for 4 actions
 
     def forward(self, x):
-        pass
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = x.view(-1, 32 * config.ENV_SIZE * config.ENV_SIZE)
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
 
-    def policy(self):
-        pass
+
+

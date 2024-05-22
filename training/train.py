@@ -51,7 +51,6 @@ def loss_q():  # loss for Q-Learning model
 
 def train_model(model, train_set, val_set, criterion, optimizer):
     device = get_device()
-    #device = torch.device("cpu")
     model.to(device)
 
     train_loader = DataLoader(train_set, **config.PARAMS)
@@ -67,14 +66,12 @@ def train_model(model, train_set, val_set, criterion, optimizer):
 
             optimizer.zero_grad()
             outputs = model(environments)
-            #print(f"Current cuda memory allocated: {torch.cuda.memory_allocated(device=device)}")
             outputs = outputs.view(-1, 4)
             actions = actions.view(-1)
             curr_loss = criterion(outputs, actions)
             curr_loss.backward()
             optimizer.step()
             train_loss += curr_loss.item() * environments.size(0)
-            #print(f"Current cuda memory cached: {torch.cuda.memory_allocated(device=device)}")
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_loader, device, criterion)
         if epoch % 10 == 0 and epoch != 0:
