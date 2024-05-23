@@ -114,6 +114,9 @@ def get_device():
     use_cuda = torch.cuda.is_available()
     print(f'Using cuda: {use_cuda}')
     device = torch.device("cuda:0" if use_cuda else "cpu")
+    if torch.backends.mps.is_available():
+        print(f'Using mps: {torch.backends.mps.is_available()}')
+        device = torch.device("mps")
     return device
 
 
