@@ -4,6 +4,7 @@ import config
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import os
+import random
 
 
 # TODO 1: add train, test loss functions for behavioral cloning + behavioral cloning with rewards + Q-Learning
@@ -78,6 +79,35 @@ def train_model(model, train_set, val_set, criterion, optimizer):
             save_model(model, f"CNN_simple_CE_{epoch}")
         print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
     save_model(model, f"CNN_simple_CE")
+
+
+def epsilon_greedy_action(model, state, epsilon=0.1):
+    if random.random() < epsilon:
+        # Explore: choose a random action
+        return torch.randint(0, len(config.Actions), (1,), dtype=torch.long)
+    else:
+        # Exploit: choose action with highest Q-value
+        with torch.no_grad():
+            Q_values = model(state)
+            action = torch.argmax(Q_values, dim=1)
+            return action
+
+
+def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
+    device = get_device()
+    model.to(device)
+    train_loader = DataLoader(train_set, **config.PARAMS)
+    val_loader = DataLoader(val_set, **config.PARAMS)
+    for epoch in range(config.MAX_EPOCHS):
+        model.train()
+        train_loss = 0.0
+        for environment, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
+            environment = environment.to(device, dtype=torch.float32)
+            actions = actions.to(device, dtype=torch.long)
+            state = environment
+            env_reward = 0
+            for step in range(config.MAX_STEPS):
+                action = epsilon_greedy_action(model, state, epsilon)
 
 
 def get_device():

@@ -4,7 +4,7 @@ from tqdm import tqdm
 import os
 import json
 import training.train as train
-from model.model import BehavioralModelCNN
+from model.model import BehavioralModelCNN, QLearningModel
 from dataset.dataloader import EnvironmentDataset
 import torch.nn as nn
 import torch.optim as optim
@@ -27,8 +27,10 @@ def run():
     val_set = EnvironmentDataset(val_data)
     test_set = EnvironmentDataset(test_data)
 
-    model = BehavioralModelCNN()
-    train.train_model(model,  train_set, val_set, nn.CrossEntropyLoss(), optim.Adam(model.parameters(), lr=0.001))
+    # model = BehavioralModelCNN()
+    # train.train_model(model,  train_set, val_set, nn.CrossEntropyLoss(), optim.Adam(model.parameters(), lr=0.001))
+    q_model = QLearningModel()
+    train.train_q_model(q_model, train_set, val_set, nn.MSELoss(), optim.Adam(q_model.parameters(), lr=0.001), epsilon=0.1)
 
 
 def save_optimal_paths(envs):

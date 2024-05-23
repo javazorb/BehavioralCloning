@@ -15,7 +15,7 @@ AGENT_END_POS = 59
 AGENT = 130
 MAX_JUMP_HEIGHT = 20
 
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 PARAMS = {'batch_size': BATCH_SIZE, 'shuffle': True, 'num_workers': 6}
 MAX_EPOCHS = 100
 MAX_STEPS = 1000  # Maximum steps per episode

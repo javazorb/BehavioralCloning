@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import random
 import config
 
 
@@ -46,18 +45,6 @@ class BehavioralCloning(torch.nn.Module):
 
 
 # TODO create Q-Learning model
-def epsilon_greedy_action(model, state, epsilon=0.1):
-    if random.random() < epsilon:
-        # Explore: choose a random action
-        return torch.randint(0, len(config.Actions), (1,), dtype=torch.long)
-    else:
-        # Exploit: choose action with highest Q-value
-        with torch.no_grad():
-            Q_values = model(state)
-            action = torch.argmax(Q_values, dim=1)
-            return action
-
-
 class QLearningModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
