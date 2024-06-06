@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import os
 import random
+from environments.QEnvironment import QEnvironment
 
 
 # TODO 1: add train, test loss functions for behavioral cloning + behavioral cloning with rewards + Q-Learning
@@ -46,8 +47,16 @@ def loss_policy():  # Maybe interchangable with loss reward?
     pass
 
 
-def loss_q():  # loss for Q-Learning model
-    pass
+def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model
+    val_loss = 0.0
+    model.eval()
+    with torch.no_grad():
+        for environments, actions in val_loader:
+            environment = environment.to(device, dtype=torch.float32)
+            Q_values = model(environment)
+            actions = actions.to(device, dtype=torch.long)
+            val_loss += criterion(Q_values, actions).item()
+    return val_loss / len(val_loader.dataset)
 
 
 def train_model(model, train_set, val_set, criterion, optimizer):
@@ -96,6 +105,7 @@ def epsilon_greedy_action(model, state, epsilon=0.1):
 def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
     device = get_device()
     model.to(device)
+    env = None
     train_loader = DataLoader(train_set, **config.PARAMS)
     val_loader = DataLoader(val_set, **config.PARAMS)
     for epoch in range(config.MAX_EPOCHS):
@@ -103,11 +113,35 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
         train_loss = 0.0
         for environment, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environment = environment.to(device, dtype=torch.float32)
+            env = QEnvironment(config.ENV_SIZE, environment.detach().cpu().numpy()) # TODO works also on cuda?
             actions = actions.to(device, dtype=torch.long)
-            state = environment
+            #state = environment
+            state = torch.tensor(env.reset(), dtype=torch.float32)
             env_reward = 0
             for step in range(config.MAX_STEPS):
                 action = epsilon_greedy_action(model, state, epsilon)
+                next_state, reward, done = env.step(action.item())
+                next_state = torch.tensor(next_state, dtype=torch.float32).to(device)
+
+                with torch.no_grad():
+                    target_Q = reward + config.GAMMA * (torch.max(model(next_state)))
+                Q_values = model(state)
+                loss = criterion(Q_values[action], target_Q.unsqueeze(0))
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                state = next_state
+                env_reward += reward
+                if done:
+                    break
+            train_loss += loss.item() * state.size(0)
+            epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
+        train_loss /= len(train_loader.dataset)
+        val_loss = loss_q(model, val_loader, device, criterion)
+        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        if epoch % 10 == 0 and epoch != 0:
+            save_model(model, f"CNN_Q_Model_{epoch}")
+    save_model(model, f"CNN_Q_Model")
 
 
 def get_device():

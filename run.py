@@ -1,3 +1,4 @@
+import config
 import dataset.generate_environment as generate_data
 import dataset.dataset as data
 from tqdm import tqdm
@@ -8,6 +9,7 @@ from model.model import BehavioralModelCNN, QLearningModel
 from dataset.dataloader import EnvironmentDataset
 import torch.nn as nn
 import torch.optim as optim
+import environments.QEnvironment as QEnvironment
 
 
 def run():
