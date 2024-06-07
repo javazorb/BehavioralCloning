@@ -47,7 +47,7 @@ def loss_policy():  # Maybe interchangable with loss reward?
     pass
 
 
-def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model
+def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model # TODO implement validation q = loss_q
     val_loss = 0.0
     model.eval()
     with torch.no_grad():

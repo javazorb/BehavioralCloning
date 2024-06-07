@@ -44,7 +44,6 @@ class BehavioralCloning(torch.nn.Module):
         return x
 
 
-# TODO create Q-Learning model
 class QLearningModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
