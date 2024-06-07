@@ -45,7 +45,7 @@ class QEnvironment:
 
         new_x, new_y = new_position
         # Check if the agent is above the floor and if the next action is not jumping
-        if x > dataset.get_env_floor_height(self.environment) - 1 and action not in [2, 3]:
+        if x > dataset.get_env_floor_height(self.environment) + 1 and action not in [2, 3]:
             new_x = min(x - 1, dataset.get_env_floor_height(self.environment) + 1)  # Move down to simulate gravity
             new_position = (new_x, new_y)
 

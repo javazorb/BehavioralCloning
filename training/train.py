@@ -114,9 +114,6 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
         for environment, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environment = environment.to(device, dtype=torch.float32)
             env = QEnvironment(config.ENV_SIZE, environment.detach().cpu().numpy())
-            """if torch.cuda.is_available():
-                reshaped_env = environment.detach().view(config.ENV_SIZE, config.ENV_SIZE)
-                env = QEnvironment(config.ENV_SIZE,reshaped_env)"""
             actions = actions.to(device, dtype=torch.long)
             #state = environment
             state = torch.tensor(env.reset(), dtype=torch.float32, device=device)
@@ -125,22 +122,20 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
                 action = epsilon_greedy_action(model, state, epsilon)
                 next_state, reward, done = env.step(action.item())
                 next_state = torch.tensor(next_state, dtype=torch.float32).to(device)
-
                 with torch.no_grad():
+                    next_max_Q = torch.max(model(next_state))
                     target_Q = reward + config.GAMMA * (torch.max(model(next_state)))
                 Q_values = model(state)
-                loss_param1 = Q_values[action] #debug param
-                loss_param2 = target_Q.unsqueeze(0) # debug param
-                current_Q = model(state).gather(1, action.unsqueeze(0).unsqueeze(0)).squeeze(0) # debug param vlt loss param1
-                loss = criterion(Q_values[action], target_Q.unsqueeze(0)) # TODO debug
+                target_Q_expanded = target_Q.expand_as(Q_values)
+                epoch_loss = criterion(Q_values, target_Q_expanded)
                 optimizer.zero_grad()
-                loss.backward()
+                epoch_loss.backward()
                 optimizer.step()
                 state = next_state
                 env_reward += reward
                 if done:
                     break
-            train_loss += loss.item() * state.size(0)
+            train_loss += epoch_loss.item() * state.size(0)
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
         train_loss /= len(train_loader.dataset)
         val_loss = loss_q(model, val_loader, device, criterion)
