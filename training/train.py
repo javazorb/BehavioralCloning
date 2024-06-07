@@ -51,7 +51,7 @@ def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model
     val_loss = 0.0
     model.eval()
     with torch.no_grad():
-        for environments, actions in val_loader:
+        for environment, actions in val_loader:
             environment = environment.to(device, dtype=torch.float32)
             Q_values = model(environment)
             actions = actions.to(device, dtype=torch.long)
@@ -107,7 +107,8 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
     model.to(device)
     env = None
     train_loader = DataLoader(train_set, **config.PARAMS)
-    val_loader = DataLoader(val_set, **config.PARAMS)
+    val_loader = DataLoader(val_set, **config.PARAMS)#
+    ##val_loss = loss_q(model, val_loader, device, criterion) # TODO DEBUG
     for epoch in range(config.MAX_EPOCHS):
         model.train()
         train_loss = 0.0
@@ -138,8 +139,8 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
             train_loss += epoch_loss.item() * state.size(0)
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
         train_loss /= len(train_loader.dataset)
-        val_loss = loss_q(model, val_loader, device, criterion)
-        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        #val_loss = loss_q(model, val_loader, device, criterion)
+        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {train_loss:.4f}")
         if epoch % 10 == 0 and epoch != 0:
             save_model(model, f"CNN_Q_Model_{epoch}")
     save_model(model, f"CNN_Q_Model")
