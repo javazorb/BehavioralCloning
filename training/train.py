@@ -113,10 +113,13 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
         train_loss = 0.0
         for environment, actions in tqdm(train_loader, desc=f"Epoch {epoch + 1}/{config.MAX_EPOCHS}"):
             environment = environment.to(device, dtype=torch.float32)
-            env = QEnvironment(config.ENV_SIZE, environment.detach().cpu().numpy()) # TODO works also on cuda?
+            env = QEnvironment(config.ENV_SIZE, environment.detach().cpu().numpy())
+            """if torch.cuda.is_available():
+                reshaped_env = environment.detach().view(config.ENV_SIZE, config.ENV_SIZE)
+                env = QEnvironment(config.ENV_SIZE,reshaped_env)"""
             actions = actions.to(device, dtype=torch.long)
             #state = environment
-            state = torch.tensor(env.reset(), dtype=torch.float32)
+            state = torch.tensor(env.reset(), dtype=torch.float32, device=device)
             env_reward = 0
             for step in range(config.MAX_STEPS):
                 action = epsilon_greedy_action(model, state, epsilon)
@@ -126,7 +129,10 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
                 with torch.no_grad():
                     target_Q = reward + config.GAMMA * (torch.max(model(next_state)))
                 Q_values = model(state)
-                loss = criterion(Q_values[action], target_Q.unsqueeze(0))
+                loss_param1 = Q_values[action] #debug param
+                loss_param2 = target_Q.unsqueeze(0) # debug param
+                current_Q = model(state).gather(1, action.unsqueeze(0).unsqueeze(0)).squeeze(0) # debug param vlt loss param1
+                loss = criterion(Q_values[action], target_Q.unsqueeze(0)) # TODO debug
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
