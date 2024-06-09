@@ -19,6 +19,7 @@ def save_model(model, name, path=os.getcwd() + os.sep + 'model' + os.sep):
     path_state_dict = os.path.join(path, f'{name}_state_dict.pt')
     torch.save(model.state_dict(), path_state_dict)
     torch.save(model, path_model)
+    print(f'Model saved to {path_model}')
 
 
 def loss(model, val_loader, device, criterion):  # loss for normal NN Model use Cross Entropy loss if I remember correct
@@ -140,9 +141,10 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
         train_loss /= len(train_loader.dataset)
         #val_loss = loss_q(model, val_loader, device, criterion)
-        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {train_loss:.4f}")
+
         if epoch % 10 == 0 and epoch != 0:
             save_model(model, f"CNN_Q_Model_{epoch}")
+        print(f"\nEpoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {train_loss:.4f}")
     save_model(model, f"CNN_Q_Model")
 
 
