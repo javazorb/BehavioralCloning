@@ -10,6 +10,7 @@ def generate_environment(size=(config.ENV_SIZE, config.ENV_SIZE),
                          floor_height_range=(config.FLOOR_HEIGHT_RANGE_START, config.FLOOR_HEIGHT_RANGE_END),
                          obstacle_width=config.OBSTACLE_WIDTH,
                          obstacle_height_range=(config.OBSTACLE_RANGE_HEIGHT_START, config.OBSTACLE_RANGE_HEIGHT_END)):
+    np.random.seed(config.RANDOM_SEED)
     environment = np.zeros(size, dtype=np.uint8)
     floor_height = np.random.randint(*floor_height_range + (1,))
     environment[floor_height, :] = config.WHITE
