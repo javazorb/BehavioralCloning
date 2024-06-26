@@ -1,6 +1,7 @@
 # folders to ignore
 dataset/data/*
 dataset/images/*
+.idea
 
 *.json
 *.pkl
