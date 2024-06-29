@@ -50,13 +50,31 @@ def loss_policy():  # Maybe interchangable with loss reward?
 
 def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model # TODO implement validation q = loss_q
     val_loss = 0.0
-    model.eval()
+    model.to(device)
+    env = None
+    train_loss = 0.0
     with torch.no_grad():
         for environment, actions in val_loader:
             environment = environment.to(device, dtype=torch.float32)
-            Q_values = model(environment)
-            actions = actions.to(device, dtype=torch.long)
-            val_loss += criterion(Q_values, actions).item()
+            env = QEnvironment(config.ENV_SIZE, environment.detach().cpu().numpy())
+            state = torch.tensor(env.reset(), dtype=torch.float32, device=device)
+            env_reward = 0
+            for step in range(config.MAX_STEPS):
+                action = epsilon_greedy_action(model, state, epsilon)
+                next_state, reward, done = env.step(action.item())
+                next_state = torch.tensor(next_state, dtype=torch.float32).to(device)
+                with torch.no_grad():
+                    target_Q = reward + config.GAMMA * (torch.max(model(next_state)))
+                Q_values = model(state)
+                target_Q_expanded = target_Q.expand_as(Q_values)
+                epoch_loss = criterion(Q_values, target_Q_expanded)
+                #epoch_loss.backward()
+                state = next_state
+                env_reward += reward
+                if done:
+                    break
+            val_loss += epoch_loss.item() * state.size(0)
+            epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
     return val_loss / len(val_loader.dataset)
 
 
