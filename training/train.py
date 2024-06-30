@@ -6,6 +6,7 @@ from tqdm import tqdm
 import os
 import random
 from environments.QEnvironment import QEnvironment
+from sklearn.metrics import accuracy_score, f1_score, mean_squared_error
 
 
 # Future TODO: add function where validation set is used for hyperparameter tuning
@@ -22,6 +23,8 @@ def loss(model, val_loader, device, criterion, return_list=False):  # loss for n
     model.eval()
     val_loss = 0.0
     losses = []
+    accuracies = []
+    f1_scores = []
     with torch.no_grad():
         for environments, actions in val_loader:
             environments = environments.to(device, dtype=torch.float32)
@@ -34,9 +37,14 @@ def loss(model, val_loader, device, criterion, return_list=False):  # loss for n
             val_loss += curr_loss.item() * environments.size(0)
             if return_list:
                 losses.append(curr_loss.item())
+                y_true = actions.cpu().numpy()
+                y_pred = torch.argmax(outputs.cpu(), dim=1).numpy()
+                accuracies.append(accuracy_score(y_true, y_pred))
+                #f1_scores.append(f1_score(y_true, y_pred))
+
     val_loss /= len(val_loader.dataset)
     if return_list:
-        return val_loss, losses
+        return val_loss, losses , accuracies#, f1_scores
     return val_loss
 
 
@@ -55,6 +63,7 @@ def loss_q(model, val_loader, device, criterion, return_list=False):
     env = None
     epsilon = 0.1
     losses = []
+    rmses = []
     with torch.no_grad():
         for environment, actions in val_loader:
             environment = environment.to(device, dtype=torch.float32)
@@ -79,6 +88,8 @@ def loss_q(model, val_loader, device, criterion, return_list=False):
                 losses.append(epoch_loss.item())
             val_loss += epoch_loss.item() * state.size(0)
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
+        #if return_list:
+            #rmses.append(mean_squared_error(actions, ))
     if return_list:
         return val_loss / len(val_loader.dataset), losses
     return val_loss / len(val_loader.dataset)

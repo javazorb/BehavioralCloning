@@ -13,6 +13,7 @@ from dataset.dataloader import EnvironmentDataset
 import torch.nn as nn
 import torch.optim as optim
 import glob
+import numpy as np
 import environments.QEnvironment as QEnvironment
 
 
@@ -83,13 +84,15 @@ def get_test_loss(test_set, test_qmodel=False):
         print(f'testing {cnt} model')
         if test_qmodel:
             config.BATCH_SIZE = 1
-            test_loss, losses = train.loss_q(model, test_loader, device, nn.MSELoss(), True, 1)
+            test_loss, losses, rmse = train.loss_q(model, test_loader, device, nn.MSELoss(), True)
         else:
             config.BATCH_SIZE = 10
-            test_loss, losses = train.loss(model, test_loader, device, nn.CrossEntropyLoss(), True)
+            test_loss, losses, accuracies = train.loss(model, test_loader, device, nn.CrossEntropyLoss(), True)
         bc_losses_list.append(losses)
         if old_loss > test_loss:
             min_loss_model = os.path.basename(model_file)
+        print(f'accuracies for individual 10 env batch: {accuracies}')
+        print(f'mean accuray: {np.mean(accuracies)}')
         print(f'Model: {os.path.basename(model_file)}, Test Loss: {test_loss}')
         cnt += 1
     print_losses_pic(bc_losses_list, model_files)
