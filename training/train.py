@@ -8,11 +8,7 @@ import random
 from environments.QEnvironment import QEnvironment
 
 
-# TODO 1: add train, test loss functions for behavioral cloning + behavioral cloning with rewards + Q-Learning
-# TODO 2: add function where validation set is used for hyperparameter tuning
-# TODO 3: add a reward system for policy tuning in the loss and training function for positive emphasis on correct
-#   behaviour
-
+# Future TODO: add function where validation set is used for hyperparameter tuning
 
 def save_model(model, name, path=os.getcwd() + os.sep + 'model' + os.sep):
     path_model = os.path.join(path, f'{name}_model.pt')
@@ -22,9 +18,10 @@ def save_model(model, name, path=os.getcwd() + os.sep + 'model' + os.sep):
     print(f'Model saved to {path_model}')
 
 
-def loss(model, val_loader, device, criterion):  # loss for normal NN Model use Cross Entropy loss if I remember correct
+def loss(model, val_loader, device, criterion, return_list=False):  # loss for normal NN Model use Cross Entropy loss if I remember correct
     model.eval()
     val_loss = 0.0
+    losses = []
     with torch.no_grad():
         for environments, actions in val_loader:
             environments = environments.to(device, dtype=torch.float32)
@@ -35,8 +32,11 @@ def loss(model, val_loader, device, criterion):  # loss for normal NN Model use 
             actions = actions.view(-1)
             curr_loss = criterion(outputs, actions)
             val_loss += curr_loss.item() * environments.size(0)
-
+            if return_list:
+                losses.append(curr_loss.item())
     val_loss /= len(val_loader.dataset)
+    if return_list:
+        return val_loss, losses
     return val_loss
 
 
@@ -48,11 +48,13 @@ def loss_policy():  # Maybe interchangable with loss reward?
     pass
 
 
-def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model # TODO implement validation q = loss_q
+def loss_q(model, val_loader, device, criterion, return_list=False):
     val_loss = 0.0
+    model.eval()
     model.to(device)
     env = None
-    train_loss = 0.0
+    epsilon = 0.1
+    losses = []
     with torch.no_grad():
         for environment, actions in val_loader:
             environment = environment.to(device, dtype=torch.float32)
@@ -73,8 +75,12 @@ def loss_q(model, val_loader, device, criterion):  # loss for Q-Learning model #
                 env_reward += reward
                 if done:
                     break
+            if return_list:
+                losses.append(epoch_loss.item())
             val_loss += epoch_loss.item() * state.size(0)
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
+    if return_list:
+        return val_loss / len(val_loader.dataset), losses
     return val_loss / len(val_loader.dataset)
 
 
@@ -156,7 +162,7 @@ def train_q_model(model, train_set, val_set, criterion, optimizer, epsilon=0.1):
             train_loss += epoch_loss.item() * state.size(0)
             epsilon = max(epsilon * config.EPS_DECAY, config.MIN_EPSILON)
         train_loss /= len(train_loader.dataset)
-        #val_loss = loss_q(model, val_loader, device, criterion) # TODO DEBUG
+        #val_loss = loss_q(model, val_loader, device, criterion)
 
         if epoch % 10 == 0 and epoch != 0:
             save_model(model, f"CNN_Q_Model_{epoch}")
@@ -221,7 +227,3 @@ def train_model_linear(model, train_set, val_set, criterion, optimizer):
         train_loss /= len(train_loader.dataset)
         val_loss = loss(model, val_set, device, criterion)
         print(f"Epoch {epoch + 1}/{config.MAX_EPOCHS}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-
-
-def test(model, test_loader):
-    pass
